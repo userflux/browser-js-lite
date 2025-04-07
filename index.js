@@ -1,6 +1,7 @@
 class UserFlux {
 	static ufApiKey = null
 	static ufUserId = null
+	static ufExternalId = null
 	static ufTrackQueue = []
 	static ufAnonymousId = ""
 	static ufSessionId = null
@@ -405,6 +406,11 @@ class UserFlux {
 		UserFlux.getStorage()?.setItem("uf-userId", userId)
 	}
 
+	static setExternalId(externalId) {
+		UserFlux.ufExternalId = externalId
+		UserFlux.getStorage()?.setItem("uf-externalId", externalId)
+	}
+
 	static loadEventsFromStorage() {
 		try {
 			const events = UserFlux.getStorage()?.getItem("uf-track")
@@ -429,6 +435,9 @@ class UserFlux {
 
 		UserFlux.ufAnonymousId = UserFlux.createNewAnonymousId()
 		UserFlux.getStorage()?.setItem("uf-anonymousId", UserFlux.ufAnonymousId)
+
+		UserFlux.ufExternalId = null
+		UserFlux.getStorage()?.removeItem("uf-externalId")
 	}
 
 	static startFlushInterval() {
@@ -455,6 +464,11 @@ class UserFlux {
 		if (userId && (typeof userId !== "string" || UserFlux.isStringNullOrBlank(userId))) userId = null
 		if (userId !== UserFlux.ufUserId) UserFlux.setUserId(userId)
 
+		// sanity check externalId
+		let externalId = parameters.externalId || UserFlux.ufExternalId || UserFlux.getExternalIdQueryParam()
+		if (externalId && (typeof externalId !== "string" || UserFlux.isStringNullOrBlank(externalId))) externalId = null
+		if (externalId !== UserFlux.ufExternalId) UserFlux.setExternalId(externalId)
+
 		// sanity check properties
 		const properties = parameters.properties || {}
 		if (typeof properties !== "object") {
@@ -478,6 +492,7 @@ class UserFlux {
 
 		const payload = {
 			userId: userId,
+			externalId: externalId,
 			anonymousId: UserFlux.getOrCreateAnonymousId(),
 			properties: properties,
 			deviceData: enrichDeviceData ? UserFlux.getDeviceProperties() : null,
@@ -510,6 +525,11 @@ class UserFlux {
 		let userId = parameters.userId || UserFlux.ufUserId
 		if (userId && (typeof userId !== "string" || UserFlux.isStringNullOrBlank(userId))) userId = null
 		if (userId !== UserFlux.ufUserId) UserFlux.setUserId(userId)
+
+		// sanity check externalId
+		let externalId = parameters.externalId || UserFlux.ufExternalId || UserFlux.getExternalIdQueryParam()
+		if (externalId && (typeof externalId !== "string" || UserFlux.isStringNullOrBlank(externalId))) externalId = null
+		if (externalId !== UserFlux.ufExternalId) UserFlux.setExternalId(externalId)
 
 		// sanity check properties
 		const properties = parameters.properties || {}
@@ -577,6 +597,7 @@ class UserFlux {
 		const payload = {
 			timestamp: Date.now(),
 			userId: userId,
+			externalId: externalId,
 			anonymousId: UserFlux.getOrCreateAnonymousId(),
 			sessionId: UserFlux.getSessionId(),
 			name: event,
@@ -834,6 +855,22 @@ class UserFlux {
 			return UserFlux.removeNullProperties(queryParams)
 		} catch (error) {
 			console.info("Error for getPaidAdProperties(): ", error)
+			return null
+		}
+	}
+
+	static getExternalIdQueryParam() {
+		try {
+			// Check if running in a browser environment
+			if (typeof window === "undefined") {
+				return null
+			}
+
+			let locationHref = window.location.href
+			const urlSearchParams = new URLSearchParams(new URL(locationHref).search)
+			return urlSearchParams.get("ufeid") || null
+		} catch (error) {
+			console.info("Error for getExternalIdQueryParam(): ", error)
 			return null
 		}
 	}
