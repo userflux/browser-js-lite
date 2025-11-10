@@ -730,7 +730,7 @@ class UserFlux {
 				path: window.location.pathname,
 				pageTitle: document.title,
 			})
-		} catch (e) {
+		} catch (error) {
 			console.info("Error on getPageProperties:", error)
 			return {}
 		}

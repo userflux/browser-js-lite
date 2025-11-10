@@ -1,6 +1,6 @@
 {
 	"name": "@userflux/browser-js-lite",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "UserFlux's Brower SDK (Lite) - send your frontend analytics data to the UserFlux platform",
 	"main": "index.js",
 	"types": "index.d.ts",
