@@ -43,6 +43,7 @@ The `initialize` method takes two arguments:
     -   `disableUserIdStorage` - A boolean indicating whether or not to store the provided user id in storage. Defaults to `false`
     -   `blockCommonBots` - A boolean indicating whether or not to block common bots from being tracked. Defaults to `true`
     -   `anonymousIdOverride` - A string value to be used as the anonymous id of the device the user is on.
+    -   `endpoint` - A string value used as the base path for sending events to, useful in case you need to proxy events through a server. Defaults to `https://integration-api.userflux.co`.
 
 ## 3. Tracking events
 
